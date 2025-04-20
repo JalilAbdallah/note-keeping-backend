@@ -6,6 +6,7 @@ Backend for a note-keeping application built with Node.js, Express.js, and Mongo
 
 - CRUD operations for notes (title, content, creation date)
 - Search notes by title or content
+- Organized with MVC pattern (Model, Controller, Routes)
 - Error handling with appropriate status codes
 
 ## Setup
