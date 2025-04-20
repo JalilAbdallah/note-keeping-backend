@@ -1,9 +1,9 @@
 // controllers/noteController.js
-import { isValidObjectId } from 'mongoose';
-import Note, { countDocuments, find, findByIdAndUpdate, findByIdAndDelete } from '../models/Note';
+import mongoose from 'mongoose';
+import Note from '../models/Note.js';
 
-// Get all notes with pagination
-export async function getAllNotes(req, res) {
+// Get all notes
+export const getAllNotes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -13,8 +13,8 @@ export async function getAllNotes(req, res) {
       return res.status(400).json({ message: 'Page and limit must be positive integers' });
     }
 
-    const total = await countDocuments();
-    const notes = await find().skip(skip).limit(limit).sort({ createdAt: -1 });
+    const total = await Note.countDocuments();
+    const notes = await Note.find().skip(skip).limit(limit).sort({ createdAt: -1 });
 
     res.status(200).json({
       notes,
@@ -26,10 +26,10 @@ export async function getAllNotes(req, res) {
     console.error('Error fetching notes:', error);
     res.status(500).json({ message: 'Server error while fetching notes' });
   }
-}
+};
 
 // Create a new note
-export async function createNote(req, res) {
+export const createNote = async (req, res) => {
   try {
     const { title, content } = req.body;
 
@@ -45,15 +45,15 @@ export async function createNote(req, res) {
     console.error('Error creating note:', error);
     res.status(400).json({ message: error.message || 'Invalid note data' });
   }
-}
+};
 
 // Update a note by ID
-export async function updateNote(req, res) {
+export const updateNote = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content } = req.body;
 
-    if (!isValidObjectId(id)) {
+    if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid note ID' });
     }
 
@@ -61,7 +61,7 @@ export async function updateNote(req, res) {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
-    const note = await findByIdAndUpdate(
+    const note = await Note.findByIdAndUpdate(
       id,
       { title, content, createdAt: new Date() },
       { new: true, runValidators: true }
@@ -76,18 +76,18 @@ export async function updateNote(req, res) {
     console.error('Error updating note:', error);
     res.status(400).json({ message: error.message || 'Invalid update data' });
   }
-}
+};
 
 // Delete a note by ID
-export async function deleteNote(req, res) {
+export const deleteNote = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!isValidObjectId(id)) {
+    if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid note ID' });
     }
 
-    const note = await findByIdAndDelete(id);
+    const note = await Note.findByIdAndDelete(id);
 
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
@@ -98,18 +98,17 @@ export async function deleteNote(req, res) {
     console.error('Error deleting note:', error);
     res.status(500).json({ message: 'Server error while deleting note' });
   }
-}
+};
 
 // Search notes by title or content
-export async function searchNotes(req, res) {
+export const searchNotes = async (req, res) => {
   try {
-    const { query } = req.query;
-
+    const { query } = req.query;        
     if (!query || typeof query !== 'string' || query.trim() === '') {
       return res.status(400).json({ message: 'Query parameter is required and must be a non-empty string' });
     }
 
-    const notes = await find(
+    const notes = await Note.find(
       { $text: { $search: query } },
       { score: { $meta: 'textScore' } }
     ).sort({ score: { $meta: 'textScore' } });
@@ -119,4 +118,4 @@ export async function searchNotes(req, res) {
     console.error('Search error:', error);
     res.status(500).json({ message: 'Server error while searching notes' });
   }
-}
+};

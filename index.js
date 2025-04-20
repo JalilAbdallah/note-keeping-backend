@@ -1,27 +1,23 @@
-// index.js
-import express, { json } from 'express';
-import { connect } from 'mongoose';
-import { config } from 'dotenv';
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import cors from 'cors';
-import noteRoutes from './routes/notes';
+import noteRoutes from './routes/notes.js';
 
-// Load environment variables
-config();
+// To load .env file
+dotenv.config();
 
 const app = express();
 
-// Middleware
+// using CORS is very important in this kind of applications (frontend and backend are on separate servers)
 app.use(cors());
-app.use(json());
+app.use(express.json());
 
 // Routes
 app.use('/notes', noteRoutes);
 
 // Connect to MongoDB
-connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));
 

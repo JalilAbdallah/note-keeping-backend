@@ -1,7 +1,7 @@
 // models/Note.js
 
 // Note for myself: Mongoose is an Object Data Modeling (ODM) library that provides a structured way to define schemas
-import { Schema, model } from 'mongoose';
+import {Schema, model} from 'mongoose';
 
 const noteSchema = new Schema({
   title: {
@@ -21,7 +21,7 @@ const noteSchema = new Schema({
   }
 });
 
-// Create a text index on title and content for search functionality
+// Create a text index on title and content for search feature
 noteSchema.index({ title: 'text', content: 'text' });
 
 export default model('Note', noteSchema);
